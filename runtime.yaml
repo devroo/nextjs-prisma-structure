@@ -1,0 +1,185 @@
+# Orrumel Runtime Platform deployment config.
+# This file should live at the project root.
+# File name: runtime.yaml
+
+apiVersion: orrumel.dev/v1
+kind: RuntimeProject
+
+runtime:
+  type: nextjs
+  version: v1
+
+project:
+  name: nextjs-prisma-structure
+  namespace: project-nextjs-prisma-structure
+
+source:
+  provider: github
+  repoUrl: https://github.com/devroo/nextjs-prisma-structure.git
+  branch: master
+  contextPath: .
+  auth:
+    mode: public
+
+build:
+  packageManager: pnpm
+  nodeVersion: "24"
+  dockerfileMode: platform-generated
+  fallbackWhenDockerfileMissing: true
+  installCommand: pnpm install --frozen-lockfile
+  generateCommand: pnpm prisma generate
+  buildCommand: null
+  startCommand: pnpm dev
+  buildArgs: {}
+  image:
+    registry: localhost:5001
+    repository: projects/nextjs-prisma-structure
+    tagStrategy: branch-sha-timestamp
+
+app:
+  type: web
+  replicas: 1
+  command: pnpm dev
+  service:
+    name: nextjs-prisma-structure-app
+    port: 3000
+    targetPort: 3000
+  health:
+    enabled: true
+    type: http
+    path: /
+    initialDelaySeconds: 30
+  envFileMode: platform-managed
+  env:
+    plain:
+      NEXT_PUBLIC_APP_NAME:
+        mode: provided
+        value: My App
+      NODE_ENV:
+        mode: provided
+        value: development
+    secret:
+      PASSWORD_SALT:
+        mode: provided
+        value: your-secure-password-salt-here-change-this
+      JWT_SECRET:
+        mode: provided
+        value: jeBnpd4TdryTL0mP0k5/cHA8/lS3zxacwAgY9Pi2MHA=
+      JWT_REFRESH_SECRET:
+        mode: provided
+        value: JBNreov1NJ0HqCcinCzliavgBHSZzxn7LkkTpYGnB1I=
+      SUPER_ADMIN_PASSWORD:
+        mode: provided
+        value: ChangeMeImmediately!
+      DATABASE_URL:
+        mode: generated
+        from: database.appConnectionString
+
+database:
+  enabled: true
+  type: postgresql
+  version: "18"
+  serviceName: nextjs-prisma-structure-postgres
+  port: 5432
+  database: homestead
+  schema: public
+  admin:
+    user: postgres
+    password:
+      mode: generated
+      secretRef: db-admin-password
+  appUser:
+    user: app_user
+    password:
+      mode: generated
+      secretRef: app-db-password
+  connection:
+    injectAs: DATABASE_URL
+    format: postgresql
+    urlTemplate: postgresql://{user}:{passwordUrlEncoded}@{serviceName}:{port}/{database}?schema={schema}
+  storage:
+    className: local-path
+    size: 10Gi
+    reclaimPolicy: retain
+  init:
+    mode: dump
+    waitForReady: true
+    dump:
+      file: homestead.dump
+      format: pg_dump
+      noOwner: true
+      noPrivileges: true
+      cleanBeforeRestore: true
+    sql:
+      files: []
+    command:
+      enabled: false
+      command: null
+    postRestoreSql:
+      - GRANT CONNECT ON DATABASE homestead TO app_user;
+      - GRANT USAGE ON SCHEMA public TO app_user;
+      - GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+      - GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO app_user;
+      - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+      - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO app_user;
+
+resources:
+  app:
+    cpu: 500m
+    memory: 512Mi
+  db:
+    cpu: 500m
+    memory: 1Gi
+    storage: 10Gi
+
+ingress:
+  enabled: true
+  className: traefik
+  host: nextjs-prisma-structure.localhost
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    issuer: null
+    secretName: null
+
+deployment:
+  strategy: recreate
+  waitOrder:
+    - namespace
+    - secrets
+    - postgres
+    - db-restore-job
+    - app
+    - service
+    - ingress
+
+manifest:
+  mode: kustomize
+
+gitops:
+  enabled: true
+  provider: argocd
+  applicationName: nextjs-prisma-structure
+  manifestsPath: manifests/projects/nextjs-prisma-structure
+  syncPolicy: manual
+  prune: false
+  selfHeal: false
+
+observability:
+  logs:
+    enabled: true
+    labels:
+      project: nextjs-prisma-structure
+      runtime: nextjs
+  metrics:
+    enabled: false
+  links:
+    argocd: true
+    logs: false
+    metrics: false
+
+security:
+  secretManagement: kubernetes-secret
+  allowPrivileged: false
+  allowHostPath: false

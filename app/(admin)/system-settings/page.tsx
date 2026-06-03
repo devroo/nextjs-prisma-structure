@@ -4,6 +4,8 @@ import SettingsClient from '@/app/(admin)/system-settings/settings-client';
 import { SystemSettingsService } from '@/domain/system/system-settings.service';
 import { ErrorCode, isAppErrorCode } from '@/lib/errors';
 
+export const dynamic = "force-dynamic";
+
 async function SystemSettingsPage() {
   const session = await verifySession();
   if (!session) redirect('/');

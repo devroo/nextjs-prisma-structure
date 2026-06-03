@@ -6,6 +6,8 @@ import { getAuthContext } from "@/lib/auth-context";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/app/_components/ui/sidebar";
 import { SystemSettingsRepo } from "@/domain/system/system-settings.repo";
 
+export const dynamic = "force-dynamic";
+
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   const auth = await getAuthContext();
   const cookieStore = await cookies();

@@ -28,8 +28,8 @@ build:
   fallbackWhenDockerfileMissing: true
   installCommand: pnpm install --frozen-lockfile
   generateCommand: pnpm prisma generate
-  buildCommand: null
-  startCommand: pnpm dev
+  buildCommand: pnpm build
+  startCommand: pnpm start
   buildArgs: {}
   image:
     registry: localhost:5001
@@ -39,7 +39,7 @@ build:
 app:
   type: web
   replicas: 1
-  command: pnpm dev
+  command: pnpm start
   service:
     name: nextjs-prisma-structure-app
     port: 3000

@@ -7,6 +7,8 @@ import { ErrorCode, isAppErrorCode } from '@/lib/errors';
 import { UsersClient } from '@/app/(admin)/user-management/users/users-client';
 import { Skeleton } from '@/app/_components/ui/skeleton';
 
+export const dynamic = "force-dynamic";
+
 const UsersPageSkeleton = () => (
   <div className="space-y-4">
     <div className="flex justify-between items-center">

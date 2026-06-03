@@ -7,6 +7,8 @@ import { Container, ContainerHeader } from "@/app/_components/container";
 import { Skeleton } from '@/app/_components/ui/skeleton';
 import { RolesClient } from '@/app/(admin)/user-management/roles-and-permissions/roles-client';
 
+export const dynamic = "force-dynamic";
+
 const RolesPageSkeleton = () => (
   <div className="space-y-4">
     <div className="flex justify-between items-center">

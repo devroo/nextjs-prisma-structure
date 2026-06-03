@@ -2,6 +2,8 @@ import { Container, ContainerHeader } from "@/app/_components/container";
 import { DashboardClient } from "@/app/(admin)/dashboard/_components/dashboard-client";
 import type { DashboardData } from "@/app/(admin)/dashboard/_types";
 
+export const dynamic = "force-dynamic";
+
 // Dummy data for the dashboard
 const dummyDashboardData: DashboardData = {
   stats: [

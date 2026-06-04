@@ -161,7 +161,9 @@ gitops:
   enabled: true
   provider: argocd
   applicationName: nextjs-prisma-structure
-  manifestsPath: manifests/projects/nextjs-prisma-structure
+  repoUrl: https://github.com/devroo/orrumel-manifests.git
+  targetRevision: master
+  manifestsPath: projects/nextjs-prisma-structure
   syncPolicy: manual
   prune: false
   selfHeal: false

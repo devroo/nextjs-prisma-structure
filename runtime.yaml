@@ -19,18 +19,38 @@ source:
   branch: master
   contextPath: .
   auth:
+    # public | token | ssh
+    # token mode reads tokenEnv, falling back to GH_TOKEN.
+    # ssh mode uses sshKeyPath relative to this runtime.yaml.
     mode: public
+    tokenEnv: GITHUB_TOKEN
+    username: x-access-token
+    sshKeyPath: null
 
 build:
+  # Supported package managers: pnpm, npm, yarn, bun.
   packageManager: pnpm
   nodeVersion: "24"
+  # platform-generated uses Orrumel's template.
+  # repo-dockerfile uses build.dockerfilePath relative to source.contextPath.
   dockerfileMode: platform-generated
+  dockerfilePath: Dockerfile
   fallbackWhenDockerfileMissing: true
   installCommand: pnpm install --frozen-lockfile
   generateCommand: pnpm prisma generate
   buildCommand: pnpm build
   startCommand: pnpm start
+  target: null
+  # Example:
+  # buildArgs:
+  #   NEXT_PUBLIC_APP_NAME: My App
   buildArgs: {}
+  cache:
+    # none | inline | registry | local
+    enabled: false
+    strategy: none
+    image: localhost:5001/cache/nextjs-prisma-structure:buildcache
+    localPath: .orrumel/build-cache/nextjs-prisma-structure
   image:
     registry: localhost:5001
     repository: projects/nextjs-prisma-structure

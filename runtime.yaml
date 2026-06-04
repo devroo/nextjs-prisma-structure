@@ -182,6 +182,22 @@ observability:
     metrics: false
 
 security:
-  secretManagement: kubernetes-secret
+  secretManagement: external-secrets
   allowPrivileged: false
   allowHostPath: false
+
+secrets:
+  backend:
+    # MVP backend: Kubernetes Secret provider.
+    # 실제 secret 값은 GitOps repo가 아니라 이 namespace의 source Secret에만 저장됩니다.
+    type: kubernetes
+    namespace: orrumel-secrets
+    secretStoreName: orrumel-k8s-store
+    serviceAccountName: orrumel-external-secrets-reader
+  sync:
+    # ExternalSecret이 backend 값을 target namespace Secret으로 다시 동기화하는 주기입니다.
+    refreshInterval: 1h
+  rotation:
+    # MVP에서는 자동 rotation은 아직 실행하지 않고, seed 명령으로 수동 교체합니다.
+    enabled: false
+    policy: manual

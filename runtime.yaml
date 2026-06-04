@@ -102,8 +102,15 @@ database:
     size: 10Gi
     reclaimPolicy: retain
   init:
+    # Supported modes:
+    # - dump: PostgreSQL pg_dump/plain SQL, MySQL dump/plain SQL, Oracle Data Pump
+    # - sql: ordered SQL file execution
+    # - command: app/database image command execution, e.g. pnpm prisma migrate deploy
+    # - none: skip DB initialization
     mode: dump
     waitForReady: true
+    backoffLimit: 1
+    activeDeadlineSeconds: 300
     dump:
       file: homestead.dump
       format: pg_dump
@@ -111,9 +118,18 @@ database:
       noPrivileges: true
       cleanBeforeRestore: true
     sql:
+      # Example for database.init.mode=sql:
+      # files:
+      #   - db/schema.sql
+      #   - db/seed.sql
       files: []
     command:
+      # Example for Prisma migration:
+      # enabled: true
+      # image: app
+      # command: pnpm prisma migrate deploy
       enabled: false
+      image: app
       command: null
     postRestoreSql:
       - GRANT CONNECT ON DATABASE homestead TO app_user;
